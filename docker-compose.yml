@@ -27,8 +27,7 @@ services:
   
   web:
     build:
-      context: .
-      dockerfile: docker/Dockerfile
+      context: docker/Dockerfile
     container_name: django-web
     command: >
       sh -c 'python manage.py makemigrations &&
