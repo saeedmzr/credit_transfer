@@ -1,4 +1,5 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from typing import Type
 
 from .models import BaseModel
 from .repositories import BaseRepository
@@ -6,33 +7,38 @@ from .exceptions import NotFoundError
 
 
 class BaseService(ABC):
+    _repository: BaseRepository = None
 
-    def __init__(self):
-        self._repository: BaseRepository = self._get_repository()
+    @classmethod
+    def get_repository(cls) -> BaseRepository:
+        return cls._repository
 
-    @abstractmethod
-    def _get_repository(self) -> BaseRepository:
-        pass
+    @classmethod
+    def set_filters(cls, params):
+        cls._repository.set_filters(params)
 
-    def set_filters(self, params):
-        self._repository.set_filters(params)
+    @classmethod
+    def get_all(cls):
+        return cls._repository.get_all()
 
-    def get_all(self) -> BaseModel:
-        return self._repository.get_all()
+    @classmethod
+    def get_by_id(cls, id: int | str):
+        return cls._repository.get_by_id(id)
 
-    def get_by_id(self, id: int | str) -> BaseModel:
-        instance = self._repository.get_by_id(id)
-        if instance is None:
-            raise NotFoundError()
-        return instance
+    @classmethod
+    def create(cls, data: dict):
+        return cls._repository.create(data)
 
-    def create(self, data: dict) -> BaseModel:
-        return self._repository.create(data)
+    @classmethod
+    def update(cls, id: int | str, data: dict):
+        instance = cls.get_by_id(id)
+        return cls._repository.update(instance, data)
 
-    def update(self, id: int | str, data: dict) -> BaseModel:
-        instance = self.get_by_id(id)
-        return self._repository.update(instance, data)
+    @classmethod
+    def delete(cls, id: int | str):
+        instance = cls.get_by_id(id)
+        cls._repository.delete(instance)
 
-    def delete(self, id: int | str) -> None:
-        instance = self.get_by_id(id)
-        self._repository.delete(instance)
+    @classmethod
+    def check_related_user_id(cls, id: int, user_id: int):
+        cls._repository.check_related_user_id(id, user_id)

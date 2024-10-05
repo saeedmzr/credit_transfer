@@ -7,11 +7,13 @@ from apps.base.models import BaseModel
 
 class Crypto(BaseModel):
     name = models.CharField(max_length=255)
-    abbreviation = models.CharField(max_length=255,unique=True)
+    abbreviation = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     price = models.FloatField()
+
     def __str__(self):
         return self.abbreviation
+
 
 class CryptoPriceHistory(BaseModel):
     crypto = models.ForeignKey(Crypto, on_delete=models.CASCADE)

@@ -1,47 +1,62 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Type
 
 from django.db.models import QuerySet
 
 from .models import BaseModel
 from .serializers import BaseModelSerializer
+from .exceptions import NotFoundError, PermissionDeniedError
 
 
 class BaseRepository(ABC):
+    _model: Type[BaseModel] = None
+    _serializer: Type[BaseModelSerializer] = None
 
-    def __init__(self):
-        self._model: Type[BaseModel] = self._get_model()
-        self._serializer: Type[BaseModelSerializer] = self._get_serializer()
+    @classmethod
+    def _get_model(cls) -> Type[BaseModel]:
+        return cls._model
 
-    @abstractmethod
-    def _get_model(self) -> Type[BaseModel]:
+    @classmethod
+    def _get_serializer(cls) -> Type[BaseModelSerializer]:
+        return cls._serializer
+
+    @classmethod
+    def get_queryset(cls) -> QuerySet:
+        return cls._model.objects.get_queryset()
+
+    @classmethod
+    def set_filters(cls, filters):
         pass
 
-    @abstractmethod
-    def _get_serializer(self) -> Type[BaseModelSerializer]:
-        pass
+    @classmethod
+    def get_all(cls):
+        return cls._model.objects.get_queryset().all()
 
-    def get_queryset(self) -> QuerySet:
-        return self._model.objects.get_queryset()
+    @classmethod
+    def get_by_id(cls, id: int | str):
+        instance = cls._model.objects.filter(pk=id).first()
+        if instance is None:
+            raise NotFoundError()
+        return instance
 
-    def set_filters(self, filters):
-        pass
-
-    def get_all(self) -> BaseModel:
-        return self._model.objects.get_queryset().all()
-
-    def get_by_id(self, id: int | str) -> BaseModel:
-        return self._model.objects.filter(pk=id).first()
-
-    def create(self, data: dict) -> BaseModel:
-        serializer = self._serializer(data=data)
+    @classmethod
+    def create(cls, data: dict):
+        serializer = cls._serializer(data=data)
         serializer.is_valid(raise_exception=True)
         return serializer.save()
 
-    def update(self, instance: BaseModel, data: dict) -> BaseModel:
-        serializer = self._serializer(instance=instance, data=data, partial=True)
+    @classmethod
+    def update(cls, instance: BaseModel, data: dict):
+        serializer = cls._serializer(instance=instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         return serializer.save()
 
-    def delete(self, instance: BaseModel) -> None:
-        instance.soft_delete()
+    @classmethod
+    def delete(cls, instance: BaseModel):
+        instance.delete()
+
+    @classmethod
+    def check_related_user_id(cls, id: int, user_id: int):
+        instance = cls.get_by_id(id)
+        if instance.user_id != user_id:
+            raise PermissionDeniedError()
