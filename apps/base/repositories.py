@@ -1,11 +1,11 @@
 from abc import ABC
 from typing import Type
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from .models import BaseModel
 from .serializers import BaseModelSerializer
-from .exceptions import NotFoundError, PermissionDeniedError
+from .exceptions import NotFoundError, PermissionDeniedError, FilterIsInvalid
 
 
 class BaseRepository(ABC):
@@ -25,16 +25,39 @@ class BaseRepository(ABC):
         return cls._model.objects.get_queryset()
 
     @classmethod
-    def set_filters(cls, filters):
-        pass
+    def filter(cls, filters: dict):
+        q_object = Q()
+
+        for filter_item in filters:
+            key = filter_item['key']
+            value = filter_item['value']
+            op = filter_item['op']
+
+            try:
+                q_object &= Q(**{f"{key}__{op}": value})
+            except ValueError:
+                raise FilterIsInvalid()
+        return q_object
+
+    @classmethod
+    def sort(cls, sort: dict):
+        key = {}
+        for sort_item in sort:
+            key = sort_item['key']
+            order = sort_item['type']
+
+            if order == 'desc':
+                key = f"-{key}"
+
+        return key
 
     @classmethod
     def get_all(cls):
         return cls._model.objects.get_queryset().all()
 
     @classmethod
-    def get_by_id(cls, id: int | str):
-        instance = cls._model.objects.filter(pk=id).first()
+    def get_by_pk(cls, pk: int | str):
+        instance = cls._model.objects.filter(pk=pk).first()
         if instance is None:
             raise NotFoundError()
         return instance

@@ -25,30 +25,34 @@ class Wallet(BaseModel):
         ]
 
 
-class WalletLogType(models.TextChoices):
-    DEPOSIT = "deposit"
-    TRANSFER = "transfer"
-    WITHDRAW = "withdraw"
-    DEFAULT = DEPOSIT
 
 
 class TransferStatus(models.TextChoices):
     DONE = "done"
     FAILED = "failed"
     PENDING = "pending"
-    DEFAULT = PENDING
 
+class WalletLogType(models.TextChoices):
+    DEPOSIT = "deposit"
+    TRANSFER = "transfer"
+    WITHDRAW = "withdraw"
 
 class WalletLog(BaseModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.DO_NOTHING)
     amount = models.FloatField(default=0)
     balance = models.FloatField(default=0)
-    type = models.Choices(WalletLogType.choices)
+    type = models.CharField(max_length=20, choices=WalletLogType.choices, default=WalletLogType.DEPOSIT)
     payload = models.JSONField(null=True, max_length=1500)
+
+
+class Deposit(BaseModel):
+    wallet = models.ForeignKey(Wallet, on_delete=models.DO_NOTHING)
+    amount = models.FloatField(default=0)
+    status = models.CharField(max_length=20, choices=TransferStatus.choices, default=TransferStatus.PENDING)
 
 
 class Transfer(BaseModel):
     sender = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     receiver = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     amount = models.FloatField()
-    status = models.Choices(TransferStatus.choices)
+    status = models.CharField(max_length=20, choices=TransferStatus.choices, default=TransferStatus.PENDING)

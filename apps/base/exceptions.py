@@ -21,3 +21,10 @@ class PermissionDeniedError(CustomException):
     def __init__(self, message="You do not have the required permissions to perform this action. Please contact "
                                "support if you believe this is an error."):
         super().__init__(message, status_code=403)
+
+
+class FilterIsInvalid(CustomException):
+    """Raised for invalid filtering errors."""
+
+    def __init__(self, message="Entered filter or sort is invalid."):
+        super().__init__(message, status_code=400)

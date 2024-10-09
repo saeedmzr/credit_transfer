@@ -12,3 +12,4 @@ class BaseViewSet(ABC, GenericViewSet):
     def get_service(cls) -> BaseService:
         return cls._service
 
+    

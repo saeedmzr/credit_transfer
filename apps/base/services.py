@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import Type
 
+from django.db.models import QuerySet
+
 from .models import BaseModel
 from .repositories import BaseRepository
 from .exceptions import NotFoundError
@@ -14,16 +16,12 @@ class BaseService(ABC):
         return cls._repository
 
     @classmethod
-    def set_filters(cls, params):
-        cls._repository.set_filters(params)
-
-    @classmethod
     def get_all(cls):
         return cls._repository.get_all()
 
     @classmethod
-    def get_by_id(cls, id: int | str):
-        return cls._repository.get_by_id(id)
+    def get_by_pk(cls, pk: int | str):
+        return cls._repository.get_by_pk(pk=pk)
 
     @classmethod
     def create(cls, data: dict):
@@ -31,14 +29,31 @@ class BaseService(ABC):
 
     @classmethod
     def update(cls, id: int | str, data: dict):
-        instance = cls.get_by_id(id)
+        instance = cls.get_by_pk(id)
         return cls._repository.update(instance, data)
 
     @classmethod
     def delete(cls, id: int | str):
-        instance = cls.get_by_id(id)
+        instance = cls.get_by_pk(id)
         cls._repository.delete(instance)
 
     @classmethod
     def check_related_user_id(cls, id: int, user_id: int):
         cls._repository.check_related_user_id(id, user_id)
+
+    @classmethod
+    def get_list(cls, queryset: QuerySet = None, filters=None, sort=None):
+        try:
+            if queryset is None:
+                queryset = cls._repository.get_queryset()
+            # Apply sorting is entered
+            if sort is not None:
+                sort_op = cls._repository.sort(sort)
+                queryset = queryset.order_by(sort_op)
+            # Apply filters is entered
+            if filters is not None:
+                filters_op = cls._repository.filter(filters)
+                queryset = queryset.filter(filters_op)
+            return queryset
+        except Exception as e:
+            raise e
