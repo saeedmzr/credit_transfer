@@ -36,6 +36,7 @@ def setup_secret_key():
 
     with open(env_path, 'w') as env_file:
         env_file.writelines(new_env_content)
+        print(f"New SECRET_KEY :{new_env_content}")
 
     print(f"New SECRET_KEY generated and added to {env_path}")
 

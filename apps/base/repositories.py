@@ -5,7 +5,7 @@ from django.db.models import QuerySet, Q
 
 from .models import BaseModel
 from .serializers import BaseModelSerializer
-from .exceptions import NotFoundError, PermissionDeniedError, FilterIsInvalid
+from .exceptions import NotFoundError, PermissionDeniedError, FilterIsInValid
 
 
 class BaseRepository(ABC):
@@ -36,7 +36,7 @@ class BaseRepository(ABC):
             try:
                 q_object &= Q(**{f"{key}__{op}": value})
             except ValueError:
-                raise FilterIsInvalid()
+                raise FilterIsInValid()
         return q_object
 
     @classmethod

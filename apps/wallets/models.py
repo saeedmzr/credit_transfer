@@ -25,17 +25,17 @@ class Wallet(BaseModel):
         ]
 
 
-
-
 class TransferStatus(models.TextChoices):
     DONE = "done"
     FAILED = "failed"
     PENDING = "pending"
 
+
 class WalletLogType(models.TextChoices):
     DEPOSIT = "deposit"
     TRANSFER = "transfer"
     WITHDRAW = "withdraw"
+
 
 class WalletLog(BaseModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.DO_NOTHING)
@@ -52,7 +52,7 @@ class Deposit(BaseModel):
 
 
 class Transfer(BaseModel):
-    sender = models.ForeignKey(Wallet, on_delete=models.CASCADE)
-    receiver = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    sender = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="sender")
+    receiver = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="receiver")
     amount = models.FloatField()
     status = models.CharField(max_length=20, choices=TransferStatus.choices, default=TransferStatus.PENDING)

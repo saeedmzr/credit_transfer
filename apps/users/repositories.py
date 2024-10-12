@@ -14,3 +14,9 @@ class UserRepository(BaseRepository):
 
     def _get_serializer(self) -> Type[BaseModelSerializer]:
         return UserSerializer
+
+    @classmethod
+    def change_password(cls, instance: User, password: str):
+        instance.set_password(password)
+        instance.save()
+        return instance

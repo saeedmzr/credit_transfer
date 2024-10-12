@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 
 from apps.base.responses import Response
 from apps.base.views import BaseViewSet
+from apps.wallets.models import Deposit
 from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer
 from apps.wallets.services import DepositService, WalletService, TransferService
 
@@ -16,6 +18,12 @@ class DepositView(BaseViewSet):
     _service = DepositService
     serializer_class = DepositSerializer
 
+    @extend_schema(
+        request=DepositSerializer,
+        summary="Create a deposit",
+        description="This endpoint creates a deposit.",
+        responses=DepositSerializer,
+    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
