@@ -1,47 +1,79 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Type
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from .models import BaseModel
 from .serializers import BaseModelSerializer
+from .exceptions import NotFoundError, PermissionDeniedError, FilterIsInValid
 
 
 class BaseRepository(ABC):
+    _model: Type[BaseModel] = None
 
-    def __init__(self):
-        self._model: Type[BaseModel] = self._get_model()
-        self._serializer: Type[BaseModelSerializer] = self._get_serializer()
+    @classmethod
+    def _get_model(cls) -> Type[BaseModel]:
+        return cls._model
 
-    @abstractmethod
-    def _get_model(self) -> Type[BaseModel]:
-        pass
+    @classmethod
+    def get_queryset(cls) -> QuerySet:
+        return cls._model.objects.get_queryset()
 
-    @abstractmethod
-    def _get_serializer(self) -> Type[BaseModelSerializer]:
-        pass
+    @classmethod
+    def filter(cls, filters: dict):
+        q_object = Q()
 
-    def get_queryset(self) -> QuerySet:
-        return self._model.objects.get_queryset()
+        for filter_item in filters:
+            key = filter_item['key']
+            value = filter_item['value']
+            op = filter_item['op']
 
-    def set_filters(self, filters):
-        pass
+            try:
+                q_object &= Q(**{f"{key}__{op}": value})
+            except ValueError:
+                raise FilterIsInValid()
+        return q_object
 
-    def get_all(self) -> BaseModel:
-        return self._model.objects.get_queryset().all()
+    @classmethod
+    def sort(cls, sort: dict):
+        key = {}
+        for sort_item in sort:
+            key = sort_item['key']
+            order = sort_item['type']
 
-    def get_by_id(self, id: int | str) -> BaseModel:
-        return self._model.objects.filter(pk=id).first()
+            if order == 'desc':
+                key = f"-{key}"
 
-    def create(self, data: dict) -> BaseModel:
-        serializer = self._serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        return serializer.save()
+        return key
 
-    def update(self, instance: BaseModel, data: dict) -> BaseModel:
-        serializer = self._serializer(instance=instance, data=data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        return serializer.save()
+    @classmethod
+    def get_all(cls):
+        return cls._model.objects.get_queryset().all()
 
-    def delete(self, instance: BaseModel) -> None:
-        instance.soft_delete()
+    @classmethod
+    def get_by_pk(cls, pk: int | str):
+        instance = cls._model.objects.filter(pk=pk).first()
+        if instance is None:
+            raise NotFoundError()
+        return instance
+
+    @classmethod
+    def create(cls, data: dict):
+        obj = cls._get_model().objects.create(**data)
+        return obj
+
+    @classmethod
+    def update(cls, pk: int | str, data: dict):
+        obj = cls.get_by_pk(pk)
+        obj.update(data)
+        return obj
+
+    @classmethod
+    def delete(cls, instance: BaseModel):
+        instance.delete()
+
+    @classmethod
+    def check_related_user_id(cls, id: int | str, user_id: int):
+        instance = cls.get_by_pk(id)
+        if instance.user_id != user_id:
+            raise PermissionDeniedError()

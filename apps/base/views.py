@@ -6,11 +6,10 @@ from .services import BaseService
 
 
 class BaseViewSet(ABC, GenericViewSet):
+    _service: BaseService = None
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._service: BaseService = self._get_service()
+    @classmethod
+    def get_service(cls) -> BaseService:
+        return cls._service
 
-    @abstractmethod
-    def _get_service(self) -> BaseService:
-        pass
+    

@@ -4,6 +4,9 @@ from .repositories import UserRepository
 
 
 class UserService(BaseService):
+    _repository = UserRepository
 
-    def _get_repository(self) -> BaseRepository:
-        return UserRepository()
+    @classmethod
+    def reset_password(cls, id, password):
+        user = cls.get_by_pk(id)
+        return cls._repository.change_password(user, password)

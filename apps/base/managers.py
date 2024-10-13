@@ -8,3 +8,6 @@ class BaseManager(models.Manager):
 
     def with_deleted(self):
         return super().get_queryset()
+
+    def owner(self, user):
+        return super().get_queryset().filter(user=user)

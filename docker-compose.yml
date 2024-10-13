@@ -6,7 +6,7 @@ services:
     container_name: postgres
     restart: always
     ports:
-      - '5432:5432'
+      - '5435:5432'
     env_file:
       - .env
     volumes:
@@ -47,6 +47,7 @@ services:
   celery-worker:
     build:
       context: .
+      dockerfile: docker/Dockerfile
     command: celery -A credit_transfer worker --loglevel=info
     env_file:
       - .env
@@ -58,6 +59,7 @@ services:
   celery-beat:
     build:
       context: .
+      dockerfile: docker/Dockerfile
     command: celery -A credit_transfer beat --loglevel=info
     env_file:
       - .env
