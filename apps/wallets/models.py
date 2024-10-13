@@ -42,7 +42,6 @@ class WalletLog(BaseModel):
     amount = models.FloatField(default=0)
     balance = models.FloatField(default=0)
     type = models.CharField(max_length=20, choices=WalletLogType.choices, default=WalletLogType.DEPOSIT)
-    payload = models.JSONField(null=True, max_length=1500)
 
 
 class Deposit(BaseModel):
