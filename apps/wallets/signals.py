@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import transaction
 
-from .models import Wallet, WalletLog, Deposit, WalletLogType
+from .models import Wallet, WalletLog, Deposit, WalletLogType, TransferStatus
 from ..users.models import User
 
 _signal_processing = local()
@@ -18,21 +18,16 @@ def change_wallet_after_deposit(sender, instance, created, **kwargs):
     with transaction.atomic():
         _signal_processing.in_signal = True
 
-        Wallet.objects.filter(pk=instance.wallet).update({
-            "balance": instance.wallet.balance + instance.amount,
-        })
-        WalletLog.objects.create({
-            "wallets": instance,
-            "amount": instance.amount,
-            "balance": instance.wallet.balance + instance.amount,
-            "type": WalletLogType.DEPOSIT,
-            "payload": {
-                "wallets": instance.wallet,
-                "amount": instance.amount,
-            }
-        })
+        instance.wallet.balance = instance.wallet.balance + instance.amount
+        instance.wallet.save()
 
+        WalletLog.objects.create(
+            wallet=instance.wallet,
+            amount=instance.amount,
+            balance=instance.wallet.balance + instance.amount,
+            type=WalletLogType.DEPOSIT,
+        )
+        instance.status = TransferStatus.DONE
         instance.save(update_fields=['status'])
 
         _signal_processing.in_signal = False
-
