@@ -7,9 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 
 from apps.base.responses import Response
+from apps.base.serializers import DynamicFilteringSerializer
 from apps.base.views import BaseViewSet
-from apps.wallets.models import Deposit
-from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer
+from apps.wallets.models import Deposit, Wallet
+from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer, WalletOutputSerializer
 from apps.wallets.services import DepositService, WalletService, TransferService
 
 
@@ -55,32 +56,20 @@ class WalletView(BaseViewSet):
         return context
 
     @extend_schema(
-        summary="Get list of products",
-        description="This endpoint gets all products.",
-        responses=WalletSerializer,
+        summary="Get list of wallets",
+        description="This endpoint gets user's wallets.",
+        responses=WalletOutputSerializer,
     )
     def list(self, request, *args, **kwargs):
-        products, meta = self._service.get_all_with_pagination()
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', self.pagination_class.page_size))
+
+        wallets, meta = self._service.pagination(queryset=self._service.get_owned(request.user.id), page=page, page_size=page_size)
         return Response(
             data={
-                "products": self.get_serializer(products, many=True).data
-            }, message="List of products.", meta=meta
+                "wallets": WalletOutputSerializer(wallets, many=True).data
+            }, message="List of wallets.", meta=meta
         )
-
-    @extend_schema(
-        summary="Get a product",
-        description="This endpoint gets a product.",
-        responses=ProductSerializer,
-    )
-    def retrieve(self, request, *args, **kwargs):
-        id = kwargs.get('pk')
-        product = self._service.get_by_id(id)
-        return Response(
-            data={
-                "product": self.get_serializer(product).data
-            }, message="The product.", meta={}
-        )
-
 
     @extend_schema(
         request=WalletSerializer,
@@ -102,7 +91,6 @@ class WalletView(BaseViewSet):
             message="Wallet created successfully.",
             status=status.HTTP_201_CREATED
         )
-
 
 
 class TransferView(BaseViewSet):
