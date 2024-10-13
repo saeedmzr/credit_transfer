@@ -47,6 +47,16 @@ class BaseRepository(ABC):
         return key
 
     @classmethod
+    def get_by_pagination(cls, queryset: QuerySet, page_size: int = 10, page: int = 1) -> (QuerySet, dict):
+        count = queryset.count()
+        total_page = (count + page_size - 1) // page_size
+        return queryset[(page - 1) * page_size:page * page_size], {
+            'page': page,
+            'count': count,
+            'total_page': total_page
+        }
+
+    @classmethod
     def get_all(cls):
         return cls._model.objects.get_queryset().all()
 
