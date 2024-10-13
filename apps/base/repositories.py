@@ -10,15 +10,10 @@ from .exceptions import NotFoundError, PermissionDeniedError, FilterIsInValid
 
 class BaseRepository(ABC):
     _model: Type[BaseModel] = None
-    _serializer: Type[BaseModelSerializer] = None
 
     @classmethod
     def _get_model(cls) -> Type[BaseModel]:
         return cls._model
-
-    @classmethod
-    def _get_serializer(cls) -> Type[BaseModelSerializer]:
-        return cls._serializer
 
     @classmethod
     def get_queryset(cls) -> QuerySet:
@@ -64,22 +59,21 @@ class BaseRepository(ABC):
 
     @classmethod
     def create(cls, data: dict):
-        serializer = cls._serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        return serializer.save()
+        obj = cls._get_model().objects.create(**data)
+        return obj
 
     @classmethod
-    def update(cls, instance: BaseModel, data: dict):
-        serializer = cls._serializer(instance=instance, data=data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        return serializer.save()
+    def update(cls, pk: int | str, data: dict):
+        obj = cls.get_by_pk(pk)
+        obj.update(data)
+        return obj
 
     @classmethod
     def delete(cls, instance: BaseModel):
         instance.delete()
 
     @classmethod
-    def check_related_user_id(cls, id: int, user_id: int):
-        instance = cls.get_by_id(id)
+    def check_related_user_id(cls, id: int | str, user_id: int):
+        instance = cls.get_by_pk(id)
         if instance.user_id != user_id:
             raise PermissionDeniedError()
