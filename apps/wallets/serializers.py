@@ -3,9 +3,13 @@ from crypt import crypt
 from django.core.serializers.python import Serializer
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from apps.base.exceptions import NotFoundError
 from apps.base.serializers import BaseModelSerializer
+from apps.users.models import User
+from apps.crypto.models import Crypto
+from apps.users.managers import UserManager
 from apps.wallets.models import Wallet, WalletLog, Transfer, Deposit
 
 
@@ -13,6 +17,9 @@ class WalletSerializer(BaseModelSerializer):
     class Meta:
         model = Wallet
         fields = '__all__'
+        read_only_fields = ['user', 'balance', "hash", "deleted_at"]
+
+    crypto = serializers.PrimaryKeyRelatedField(queryset=Crypto.objects.all())
 
 
 class WalletLogSerializer(BaseModelSerializer):
