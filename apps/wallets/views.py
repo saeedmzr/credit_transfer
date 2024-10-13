@@ -1,3 +1,5 @@
+from lib2to3.fixes.fix_input import context
+
 from django.shortcuts import render
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -17,6 +19,11 @@ from apps.wallets.services import DepositService, WalletService, TransferService
 class DepositView(BaseViewSet):
     _service = DepositService
     serializer_class = DepositSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
     @extend_schema(
         request=DepositSerializer,
