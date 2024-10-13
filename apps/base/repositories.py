@@ -20,6 +20,13 @@ class BaseRepository(ABC):
         return cls._model.objects.get_queryset()
 
     @classmethod
+    def get_and_lock_for_update(cls, id: int | str):
+        instance = cls._get_model().objects.select_for_update().filter(pk=id).first()
+        if instance is None:
+            raise NotFoundError()
+        return instance
+
+    @classmethod
     def filter(cls, filters: dict):
         q_object = Q()
 
@@ -47,7 +54,7 @@ class BaseRepository(ABC):
         return key
 
     @classmethod
-    def get_by_pagination(cls, queryset: QuerySet, page_size: int = 10, page: int = 1) -> (QuerySet, dict):
+    def get_by_pagination(cls, queryset: QuerySet, page_size: int, page: int) -> (QuerySet, dict):
         count = queryset.count()
         total_page = (count + page_size - 1) // page_size
         return queryset[(page - 1) * page_size:page * page_size], {
@@ -56,6 +63,9 @@ class BaseRepository(ABC):
             'total_page': total_page
         }
 
+    @classmethod
+    def owned(cls,user_id: int):
+        return cls._model.objects.owned(user_id)
     @classmethod
     def get_all(cls):
         return cls._model.objects.get_queryset().all()
