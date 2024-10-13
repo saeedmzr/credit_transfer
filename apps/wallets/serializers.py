@@ -7,6 +7,7 @@ from rest_framework.serializers import ModelSerializer
 
 from apps.base.exceptions import NotFoundError
 from apps.base.serializers import BaseModelSerializer
+from apps.crypto.serializers import CryptoSerializer
 from apps.users.models import User
 from apps.crypto.models import Crypto
 from apps.users.managers import UserManager
@@ -20,6 +21,13 @@ class WalletSerializer(BaseModelSerializer):
         read_only_fields = ['user', 'balance', "hash", "deleted_at"]
 
     crypto = serializers.PrimaryKeyRelatedField(queryset=Crypto.objects.all())
+
+
+class WalletOutputSerializer(BaseModelSerializer):
+    class Meta:
+        model = Wallet
+        fields = [ 'hash', "balance",'crypto']
+    crypto = CryptoSerializer()
 
 
 class WalletLogSerializer(BaseModelSerializer):
