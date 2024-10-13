@@ -38,7 +38,7 @@ class TransferSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        sender_wallet = Wallet.objects.owned(user=user).filter(pk=attrs['sender'])
+        sender_wallet = Wallet.objects.owner(user=user).filter(pk=attrs['sender'])
         if sender_wallet is None:
             raise NotFoundError()
         receiver_wallet = Wallet.objects.filter(pk=attrs['receiver'], crypto=sender_wallet.crypto)
@@ -61,7 +61,7 @@ class DepositSerializer(serializers.Serializer):
 
     def validate_wallet(self, value):
         user = self.context['request'].user
-        wallet = Wallet.objects.owned(user=user).filter(pk=value)
+        wallet = Wallet.objects.owner(user=user).filter(pk=value)
         if wallet is None:
             raise NotFoundError()
         return value
