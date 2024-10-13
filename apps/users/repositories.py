@@ -8,12 +8,7 @@ from .serializers import UserSerializer
 
 
 class UserRepository(BaseRepository):
-
-    def _get_model(self) -> Type[BaseModel]:
-        return User
-
-    def _get_serializer(self) -> Type[BaseModelSerializer]:
-        return UserSerializer
+    _model = User
 
     @classmethod
     def change_password(cls, instance: User, password: str):
