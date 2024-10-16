@@ -20,6 +20,10 @@ class BaseService(ABC):
         return cls._repository.get_all()
 
     @classmethod
+    def get_owned(cls, user):
+        return cls._repository.get_owned(user=user)
+
+    @classmethod
     def get_by_pk(cls, pk: int | str):
         return cls._repository.get_by_pk(pk=pk)
 
@@ -57,3 +61,8 @@ class BaseService(ABC):
             return queryset
         except Exception as e:
             raise e
+
+    @classmethod
+    def get_by_pagination(cls, queryset: QuerySet = None, page=1, size=10):
+        result = cls._repository.get_by_pagination(queryset, page, size)
+        return result
