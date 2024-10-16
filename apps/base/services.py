@@ -20,8 +20,20 @@ class BaseService(ABC):
         return cls._repository.get_all()
 
     @classmethod
+    def get_owned(cls, user):
+        return cls._repository.get_owned(user=user)
+
+    @classmethod
     def get_by_pk(cls, pk: int | str):
         return cls._repository.get_by_pk(pk=pk)
+
+    @classmethod
+    def get_and_lock_for_update(cls, id: int | str):
+        return cls.get_repository().get_and_lock_for_update(id)
+
+    @classmethod
+    def pagination(cls, queryset: QuerySet, page_size=10, page=1):
+        return cls.get_repository().get_by_pagination(queryset=queryset, page_size=page_size, page=page)
 
     @classmethod
     def create(cls, data: dict):
@@ -42,6 +54,9 @@ class BaseService(ABC):
         cls._repository.check_related_user_id(id, user_id)
 
     @classmethod
+    def get_owned(cls, user_id: int):
+        return cls._repository.owned(user_id)
+    @classmethod
     def get_list(cls, queryset: QuerySet = None, filters=None, sort=None):
         try:
             if queryset is None:
@@ -57,3 +72,8 @@ class BaseService(ABC):
             return queryset
         except Exception as e:
             raise e
+
+    @classmethod
+    def get_by_pagination(cls, queryset: QuerySet = None, page=1, size=10):
+        result = cls._repository.get_by_pagination(queryset, page, size)
+        return result

@@ -253,3 +253,9 @@ CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # endregion --------------------------------------------------------------------
+
+# region PRICE FETCHER ----------------------------------------------------------------
+
+FCS_API_KEY = env('FSC_API_KEY')
+
+# endregion --------------------------------------------------------------------

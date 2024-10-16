@@ -8,8 +8,8 @@ from apps.base.models import BaseModel
 class Crypto(BaseModel):
     name = models.CharField(max_length=255)
     abbreviation = models.CharField(max_length=255, unique=True)
-    description = models.TextField()
-    price = models.FloatField()
+    description = models.TextField(null=True, blank=True)
+    price = models.FloatField(default=1)
     fee = models.FloatField(default=0.0)
 
     def __str__(self):

@@ -17,7 +17,14 @@ class BaseRepository(ABC):
 
     @classmethod
     def get_queryset(cls) -> QuerySet:
-        return cls._model.objects.get_queryset()
+        return cls._get_model().objects.get_queryset()
+
+    @classmethod
+    def get_and_lock_for_update(cls, id: int | str):
+        instance = cls._get_model().objects.select_for_update().filter(pk=id).first()
+        if instance is None:
+            raise NotFoundError()
+        return instance
 
     @classmethod
     def filter(cls, filters: dict):
@@ -47,12 +54,29 @@ class BaseRepository(ABC):
         return key
 
     @classmethod
+    def get_by_pagination(cls, queryset: QuerySet, page: int = 1, size: int = 10) -> (QuerySet, dict):
+        count = queryset.count()
+        total_page = (count + size - 1) // size
+        return queryset[(page - 1) * size:page * size], {
+            'page': page,
+            'count': count,
+            'total_page': total_page
+        }
+
+    @classmethod
+    def get_owned(cls, user) -> QuerySet:
+        return cls._get_model().objects.owner(user=user)
+
+    @classmethod
+    def owned(cls,user_id: int):
+        return cls._model.objects.owned(user_id)
+    @classmethod
     def get_all(cls):
-        return cls._model.objects.get_queryset().all()
+        return cls._get_model().objects.get_queryset().all()
 
     @classmethod
     def get_by_pk(cls, pk: int | str):
-        instance = cls._model.objects.filter(pk=pk).first()
+        instance = cls._get_model().objects.filter(pk=pk).first()
         if instance is None:
             raise NotFoundError()
         return instance
@@ -60,6 +84,11 @@ class BaseRepository(ABC):
     @classmethod
     def create(cls, data: dict):
         obj = cls._get_model().objects.create(**data)
+        return obj
+
+    @classmethod
+    def create_or_update(cls, insert_data: dict, update_data: dict):
+        obj = cls._get_model().objects.update_or_create(defaults=insert_data, **update_data)
         return obj
 
     @classmethod
