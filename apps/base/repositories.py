@@ -20,6 +20,13 @@ class BaseRepository(ABC):
         return cls._get_model().objects.get_queryset()
 
     @classmethod
+    def get_and_lock_for_update(cls, id: int | str):
+        instance = cls._get_model().objects.select_for_update().filter(pk=id).first()
+        if instance is None:
+            raise NotFoundError()
+        return instance
+
+    @classmethod
     def filter(cls, filters: dict):
         q_object = Q()
 
@@ -60,6 +67,9 @@ class BaseRepository(ABC):
     def get_owned(cls, user) -> QuerySet:
         return cls._get_model().objects.owner(user=user)
 
+    @classmethod
+    def owned(cls,user_id: int):
+        return cls._model.objects.owned(user_id)
     @classmethod
     def get_all(cls):
         return cls._get_model().objects.get_queryset().all()
