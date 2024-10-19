@@ -10,7 +10,7 @@ from apps.base.responses import Response
 from apps.base.views import BaseViewSet
 from apps.crypto.serializers import CryptoSerializer
 from apps.crypto.services import CryptoService
-from apps.crypto.tasks import fetch_crypto_prices
+from apps.crypto.tasks import fetch_crypto_list, fetch_crypto_prices
 from apps.wallets.models import Deposit
 from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer
 from apps.wallets.services import DepositService, WalletService, TransferService
@@ -34,7 +34,7 @@ class CryptoView(BaseViewSet):
         responses=CryptoSerializer,
     )
     def list(self, request, *args, **kwargs):
-        list = fetch_crypto_prices()
+        list = fetch_crypto_list()
         owned = self._service.get_owned(request.user)
         wallets, meta = self._service.get_by_pagination(
             queryset=self._service.get_list(owned),
