@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+from celery.schedules import crontab
 
 from ..env import env
 
@@ -251,7 +252,16 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_RESULT_EXTENDED = True
 CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
+CELERY_BEAT_SCHEDULE = {
+    'fetch_crypto_prices': {
+        'task': 'apps.crypto.tasks.fetch_crypto_prices',
+        'schedule': crontab(minute="*/1"),
+    },
+    'fetch_crypto_list': {
+        'task': 'apps.crypto.tasks.fetch_crypto_list',
+        'schedule': crontab(minute="0", hour="0", day_of_week="0"),
+    },
+}
 # endregion --------------------------------------------------------------------
 
 # region PRICE FETCHER ----------------------------------------------------------------
