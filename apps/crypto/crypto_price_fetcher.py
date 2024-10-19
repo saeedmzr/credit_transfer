@@ -43,15 +43,14 @@ class FCSapi(BasePriceFetcher):
             "symbol": symbol,
             "type": "crypto",
         }
-        return self.send_request('GET', url=self.base_url + '/latest', params=options).get("list", {}).get("response",
-                                                                                                           {})
+        return self.send_request('GET', url=self.base_url + '/latest', params=options)
 
     def get_crypto_list(self):
         options = {
             "access_key": self._api_key,
             "type": "crypto",
         }
-        return self.send_request('GET', url=self.base_url + '/list', params=options).get("response", {})
+        return self.send_request('GET', url=self.base_url + '/list', params=options)
 
 
 class CryptoFetcher:
