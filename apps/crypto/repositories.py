@@ -9,5 +9,5 @@ class CryptoRepository(BaseRepository):
 
     @classmethod
     def get_items_for_updating_price(cls):
-        items = cls._model.objects.all().order_by("updated_at")[:10]
+        items = cls._model.objects.all().order_by("updated_at")[:3]
         return items
