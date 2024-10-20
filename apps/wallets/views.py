@@ -112,3 +112,27 @@ class WalletView(BaseViewSet):
 class TransferView(BaseViewSet):
     _service = TransferService
     serializer_class = TransferSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    @extend_schema(
+        request=DepositSerializer,
+        summary="Create a transfer",
+        description="This endpoint creates a transfer.",
+        responses=DepositSerializer,
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        deposit = self.get_service().create(serializer.validated_data)
+        return Response(
+            data={
+                "transfer": self.get_serializer(deposit).data
+            },
+            message="Transfer created successfully.",
+            status=status.HTTP_201_CREATED
+        )
