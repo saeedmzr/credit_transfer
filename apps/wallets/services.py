@@ -26,15 +26,17 @@ class TransferService(BaseService):
 
     @classmethod
     def create(cls, data: dict):
+        data["sender"] = WalletRepository.get_wallet_from_hash(data["sender"])
+        data["receiver"] = WalletRepository.get_wallet_from_hash(data["receiver"])
         transfer = super().create(data=data)
 
         with transaction.atomic():
-            sender_wallet = cls._wallet_service.get_and_lock_for_update(transfer.sender.hash)
-            receiver_wallet = cls._wallet_service.get_and_lock_for_update(transfer.receiver.hash)
-            cls._wallet_service.update(sender_wallet.hash, {
+            sender_wallet = cls._wallet_service.get_and_lock_for_update(transfer.sender.pk)
+            receiver_wallet = cls._wallet_service.get_and_lock_for_update(transfer.receiver.pk)
+            cls._wallet_service.update(sender_wallet.pk, {
                 'balance': sender_wallet.balance - transfer.amount
             })
-            cls._wallet_service.update(receiver_wallet.hash, {
+            cls._wallet_service.update(receiver_wallet.pk, {
                 'balance': receiver_wallet.balance + transfer.amount
             })
 
@@ -48,9 +50,9 @@ class TransferService(BaseService):
                 'wallet': receiver_wallet,
                 'amount': transfer.amount,
                 'balance': receiver_wallet.balance + transfer.amount,
-                'type': WalletLogType.DEPOSIT
+                'type': WalletLogType.TRANSFER
             })
-            cls.update(transfer.id, {'status': TransferStatus.DONE})
+            return cls.update(transfer.id, {'status': TransferStatus.DONE})
 
 
 class DepositService(BaseService):
