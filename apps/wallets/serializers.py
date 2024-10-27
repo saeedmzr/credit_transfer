@@ -26,7 +26,8 @@ class WalletSerializer(BaseModelSerializer):
 class WalletOutputSerializer(BaseModelSerializer):
     class Meta:
         model = Wallet
-        fields = [ 'hash', "balance",'crypto']
+        fields = ['hash', "balance", 'crypto']
+
     crypto = CryptoSerializer()
 
 
@@ -40,10 +41,10 @@ class TransferSerializer(BaseModelSerializer):
     class Meta:
         model = Transfer
         fields = '__all__'
-        read_only_fields = ['status', 'sender']
+        read_only_fields = ['status', 'deleted_at']
 
-    receiver = serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
-    sender = serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
+    receiver = serializers.CharField()
+    sender = serializers.CharField()
     amount = serializers.FloatField()
 
     def validate_amount(self, value):
@@ -53,10 +54,10 @@ class TransferSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        sender_wallet = Wallet.objects.owner(user=user).filter(pk=attrs['sender'])
+        sender_wallet = Wallet.objects.owner(user=user).filter(hash=attrs['sender']).first()
         if sender_wallet is None:
             raise NotFoundError()
-        receiver_wallet = Wallet.objects.filter(pk=attrs['receiver'], crypto=sender_wallet.crypto)
+        receiver_wallet = Wallet.objects.filter(hash=attrs['receiver'], crypto=sender_wallet.crypto)
         if receiver_wallet is None:
             raise NotFoundError()
 
