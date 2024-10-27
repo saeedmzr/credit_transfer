@@ -255,11 +255,11 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULE = {
     'fetch_crypto_prices': {
         'task': 'apps.crypto.tasks.fetch_crypto_prices',
-        'schedule': crontab(minute="*/1"),
+        'schedule': crontab(minute="*"),
     },
     'fetch_crypto_list': {
         'task': 'apps.crypto.tasks.fetch_crypto_list',
-        'schedule': crontab(minute="0", hour="0", day_of_week="0"),
+        'schedule': crontab(minute="*"),
     },
 }
 # endregion --------------------------------------------------------------------
