@@ -119,19 +119,19 @@ class TransferView(BaseViewSet):
         return context
 
     @extend_schema(
-        request=DepositSerializer,
+        request=TransferSerializer,
         summary="Create a transfer",
         description="This endpoint creates a transfer.",
-        responses=DepositSerializer,
+        responses=TransferSerializer,
     )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        deposit = self.get_service().create(serializer.validated_data)
+        transfer = self.get_service().create(serializer.validated_data)
         return Response(
             data={
-                "transfer": self.get_serializer(deposit).data
+                "transfer": self.get_serializer(transfer.first()).data
             },
             message="Transfer created successfully.",
             status=status.HTTP_201_CREATED

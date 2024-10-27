@@ -34,18 +34,16 @@ class CryptoView(BaseViewSet):
         responses=CryptoSerializer,
     )
     def list(self, request, *args, **kwargs):
-        list = fetch_crypto_list()
-        owned = self._service.get_owned(request.user)
-        wallets, meta = self._service.get_by_pagination(
-            queryset=self._service.get_list(owned),
+        crypto_list, meta = self._service.get_by_pagination(
+            queryset=self._service.get_list(),
             page=self.request.query_params.get("page", 1),
             size=self.request.query_params.get("size", 10),
 
         )
         return Response(
             data={
-                "wallets": self.get_serializer(wallets, many=True).data
-            }, message="List of wallets.", meta=meta
+                "crypto_list": self.get_serializer(crypto_list, many=True).data
+            }, message="List of crypto.", meta=meta
         )
 
     @extend_schema(
