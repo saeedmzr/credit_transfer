@@ -68,9 +68,6 @@ class BaseRepository(ABC):
         return cls._get_model().objects.owner(user=user)
 
     @classmethod
-    def owned(cls,user_id: int):
-        return cls._model.objects.owned(user_id)
-    @classmethod
     def get_all(cls):
         return cls._get_model().objects.get_queryset().all()
 
@@ -93,8 +90,8 @@ class BaseRepository(ABC):
 
     @classmethod
     def update(cls, pk: int | str, data: dict):
-        obj = cls.get_by_pk(pk)
-        obj.update(data)
+        obj = cls._get_model().objects.filter(pk=pk)
+        obj.update(**data)
         return obj
 
     @classmethod
