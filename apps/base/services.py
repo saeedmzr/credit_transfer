@@ -41,8 +41,7 @@ class BaseService(ABC):
 
     @classmethod
     def update(cls, id: int | str, data: dict):
-        instance = cls.get_by_pk(id)
-        return cls._repository.update(instance, data)
+        return cls._repository.update(id, data)
 
     @classmethod
     def delete(cls, id: int | str):
@@ -53,9 +52,6 @@ class BaseService(ABC):
     def check_related_user_id(cls, id: int, user_id: int):
         cls._repository.check_related_user_id(id, user_id)
 
-    @classmethod
-    def get_owned(cls, user_id: int):
-        return cls._repository.owned(user_id)
     @classmethod
     def get_list(cls, queryset: QuerySet = None, filters=None, sort=None):
         try:
