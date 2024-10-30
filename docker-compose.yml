@@ -2,8 +2,7 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:14
-    container_name: postgres
+    image: docker.arvancloud.ir/postgres:14
     restart: always
     ports:
       - '5435:5432'
@@ -14,17 +13,6 @@ services:
     networks:
       - web
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin4
-    restart: always
-    ports:
-      - '5050:80'
-    env_file:
-      - .env
-    depends_on:
-      - db
-  
   web:
     build:
       context: .
@@ -44,15 +32,43 @@ services:
     networks:
       - web
 
+  rabbitmq:
+    image: docker.arvancloud.ir/rabbitmq:3-management-alpine
+    container_name: rabbit
+    restart: always
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    env_file:
+      - .env
+    networks:
+      - web
+
+  redis:
+    image: docker.arvancloud.ir/redis:6-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - '6383:6379'
+    env_file:
+      - .env
+    networks:
+      - web
+
   celery-worker:
     build:
       context: .
       dockerfile: docker/Dockerfile
     command: celery -A credit_transfer worker --loglevel=info
+    container_name: celery-worker
+    restart: always
+    volumes:
+      - celery_data:/celery/worker
     env_file:
       - .env
     depends_on:
       - web
+      - rabbitmq
     networks:
       - web
 
@@ -61,25 +77,40 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     command: celery -A credit_transfer beat --loglevel=info
+    container_name: celery-beat
+    restart: always
+    volumes:
+      - celery_data:/celery/beat
     env_file:
       - .env
     depends_on:
       - web
+      - rabbitmq
     networks:
       - web
 
   flower:
-    image: mher/flower
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command: celery -A credit_transfer flower
+    container_name: flower
+    restart: always
+    volumes:
+      - celery_data:/flower
     ports:
       - '5555:5555'
+    env_file:
+      - .env
     depends_on:
       - celery-worker
+      - rabbitmq
     networks:
       - web
 
 volumes:
   postgres_data:
+  celery_data:
 
 networks:
   web:

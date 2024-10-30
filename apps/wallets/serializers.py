@@ -3,9 +3,14 @@ from crypt import crypt
 from django.core.serializers.python import Serializer
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from apps.base.exceptions import NotFoundError
 from apps.base.serializers import BaseModelSerializer
+from apps.crypto.serializers import CryptoSerializer
+from apps.users.models import User
+from apps.crypto.models import Crypto
+from apps.users.managers import UserManager
 from apps.wallets.models import Wallet, WalletLog, Transfer, Deposit
 
 
@@ -13,6 +18,17 @@ class WalletSerializer(BaseModelSerializer):
     class Meta:
         model = Wallet
         fields = '__all__'
+        read_only_fields = ['user', 'balance', "hash", "deleted_at"]
+
+    crypto = serializers.PrimaryKeyRelatedField(queryset=Crypto.objects.all())
+
+
+class WalletOutputSerializer(BaseModelSerializer):
+    class Meta:
+        model = Wallet
+        fields = ['hash', "balance", 'crypto']
+
+    crypto = CryptoSerializer()
 
 
 class WalletLogSerializer(BaseModelSerializer):
@@ -25,10 +41,10 @@ class TransferSerializer(BaseModelSerializer):
     class Meta:
         model = Transfer
         fields = '__all__'
-        read_only_fields = ['status', 'sender']
+        read_only_fields = ['status', 'deleted_at']
 
-    receiver = serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
-    sender = serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
+    receiver = serializers.CharField()
+    sender = serializers.CharField()
     amount = serializers.FloatField()
 
     def validate_amount(self, value):
@@ -38,10 +54,10 @@ class TransferSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        sender_wallet = Wallet.objects.owner(user=user).filter(pk=attrs['sender'])
+        sender_wallet = Wallet.objects.owner(user=user).filter(hash=attrs['sender']).first()
         if sender_wallet is None:
             raise NotFoundError()
-        receiver_wallet = Wallet.objects.filter(pk=attrs['receiver'], crypto=sender_wallet.crypto)
+        receiver_wallet = Wallet.objects.filter(hash=attrs['receiver'], crypto=sender_wallet.crypto)
         if receiver_wallet is None:
             raise NotFoundError()
 

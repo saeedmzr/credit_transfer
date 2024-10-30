@@ -1,6 +1,6 @@
 # This docker file is used for local development via docker-compose
 
-FROM python:3.12
+FROM docker.arvancloud.ir/python:3.12
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
