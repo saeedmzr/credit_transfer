@@ -74,17 +74,17 @@ class WalletView(BaseViewSet):
         )
 
     @extend_schema(
-        summary="Get a product",
-        description="This endpoint gets a product.",
+        summary="Get a wallet",
+        description="This endpoint gets a wallet.",
         responses=WalletSerializer,
     )
     def retrieve(self, request, *args, **kwargs):
         wallet = kwargs.get('wallet')
-        product = self._service.get_by_pk(pk=wallet)
+        wallet = self._service.get_by_pk(pk=wallet)
         return Response(
             data={
-                "wallet": self.get_serializer(product).data
-            }, message="The product.", meta={}
+                "wallet": self.get_serializer(wallet).data
+            }, message="The wallet.", meta={}
         )
 
     @extend_schema(

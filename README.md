@@ -12,10 +12,6 @@ Behold My Django Project!
 - [Deployment](#deployment)
 - [Switching Between Environments](#switching-between-environments)
 
-## Features
-
-- Fill this part based on your project.
-
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
