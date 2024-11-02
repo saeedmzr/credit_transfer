@@ -8,9 +8,10 @@ from rest_framework.serializers import ModelSerializer
 
 from apps.base.responses import Response
 from apps.base.views import BaseViewSet
-from apps.wallets.models import Deposit
-from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer
-from apps.wallets.services import DepositService, WalletService, TransferService
+from apps.wallets.models import Deposit, WalletLog
+from apps.wallets.serializers import DepositSerializer, WalletSerializer, TransferSerializer, \
+    WalletLogOutputSerializer, WalletLogInputSerializer
+from apps.wallets.services import DepositService, WalletService, TransferService, WalletLogService
 
 
 # Create your views here.
@@ -135,4 +136,34 @@ class TransferView(BaseViewSet):
             },
             message="Transfer created successfully.",
             status=status.HTTP_201_CREATED
+        )
+
+
+class WalletLogView(BaseViewSet):
+    _service = WalletLogService
+    serializer_class = WalletLogOutputSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    @extend_schema(
+        request=WalletLogInputSerializer,
+        summary="List of wallet logs",
+        description="This endpoint generate list of logs.",
+        responses=WalletLogOutputSerializer,
+    )
+    def list(self, request, wallet_hash, *args, **kwargs):
+        wallet = WalletService.get_wallet_from_hash(wallet_hash)
+
+        logs, meta = self._service.get_by_pagination(
+            queryset=self._service.get_list(queryset=WalletLog.objects.filter(wallet=wallet)),
+            page=self.request.query_params.get("page", 1),
+            size=self.request.query_params.get("size", 10),
+        )
+        return Response(
+            data={
+                "logs": self.get_serializer(logs, many=True).data
+            }, message="List of logs.", meta=meta
         )

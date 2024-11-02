@@ -14,6 +14,10 @@ class WalletService(BaseService):
         data['hash'] = helpers.generate_random_string()
         return super().create(data=data)
 
+    @classmethod
+    def get_wallet_from_hash(cls, wallet_hash):
+        return cls._repository.get_wallet_from_hash(wallet_hash)
+
 
 class WalletLogService(BaseService):
     _repository = WalletLogRepository

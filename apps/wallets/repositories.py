@@ -1,7 +1,7 @@
 from apps.base.exceptions import ValidationError
 from apps.base.repositories import BaseRepository
 from apps.wallets.models import Wallet, WalletLog, Deposit, Transfer
-from apps.wallets.serializers import WalletSerializer, WalletLogSerializer, DepositSerializer, TransferSerializer
+from apps.wallets.serializers import WalletSerializer, WalletLogOutputSerializer, DepositSerializer, TransferSerializer
 
 
 class WalletRepository(BaseRepository):
@@ -23,7 +23,7 @@ class TransferRepository(BaseRepository):
 
 class WalletLogRepository(BaseRepository):
     _model = WalletLog
-    _serializer = WalletLogSerializer
+    _serializer = WalletLogOutputSerializer
 
 
 class DepositRepository(BaseRepository):

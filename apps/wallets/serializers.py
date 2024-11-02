@@ -31,10 +31,20 @@ class WalletOutputSerializer(BaseModelSerializer):
     crypto = CryptoSerializer()
 
 
-class WalletLogSerializer(BaseModelSerializer):
+class WalletLogOutputSerializer(BaseModelSerializer):
     class Meta:
         model = WalletLog
         fields = '__all__'
+
+
+class WalletLogInputSerializer(serializers.Serializer):
+    wallet_hash = serializers.CharField()
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        wallet = Wallet.objects.owner(user=user).filter(hash=attrs['wallet_hash']).first()
+        if wallet is None:
+            raise NotFoundError()
 
 
 class TransferSerializer(BaseModelSerializer):
