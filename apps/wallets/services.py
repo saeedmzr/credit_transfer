@@ -69,8 +69,8 @@ class DepositService(BaseService):
         deposit = super().create(data=data)
 
         with transaction.atomic():
-            wallet = cls._wallet_service.get_and_lock_for_update(deposit.wallet.hash)
-            cls._wallet_service.update(wallet.hash, {
+            wallet = cls._wallet_service.get_and_lock_for_update(deposit.wallet.pk)
+            cls._wallet_service.update(wallet.pk, {
                 'balance': wallet.balance + deposit.amount
             })
 
@@ -81,3 +81,4 @@ class DepositService(BaseService):
                 'type': WalletLogType.DEPOSIT
             })
             cls.update(deposit.id, {'status': TransferStatus.DONE})
+        return deposit

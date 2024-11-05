@@ -2,7 +2,7 @@ import random
 import string
 
 
-def generate_random_string(length=16):
+def generate_random_string(length=64):
     """Generates a random string of the specified length containing letters and digits.
 
     Args:

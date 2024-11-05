@@ -12,7 +12,7 @@ from apps.users.models import User
 
 class Wallet(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    hash = models.CharField(max_length=32, unique=True)
+    hash = models.CharField(max_length=64, unique=True)
     crypto = models.ForeignKey(Crypto, on_delete=models.CASCADE)
     balance = models.FloatField(default=0)
 

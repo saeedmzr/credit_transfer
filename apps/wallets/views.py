@@ -1,10 +1,6 @@
-from lib2to3.fixes.fix_input import context
-
-from django.shortcuts import render
-from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.serializers import ModelSerializer
+from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
 
 from apps.base.responses import Response
 from apps.base.views import BaseViewSet
@@ -49,6 +45,7 @@ class DepositView(BaseViewSet):
 class WalletView(BaseViewSet):
     _service = WalletService
     serializer_class = WalletSerializer
+    lookup_field = "hash"
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -80,8 +77,8 @@ class WalletView(BaseViewSet):
         responses=WalletSerializer,
     )
     def retrieve(self, request, *args, **kwargs):
-        wallet = kwargs.get('wallet')
-        wallet = self._service.get_by_pk(pk=wallet)
+        wallet_hash = kwargs.get('hash')
+        wallet = self._service.get_wallet_from_hash(wallet_hash)
         return Response(
             data={
                 "wallet": self.get_serializer(wallet).data
@@ -107,6 +104,27 @@ class WalletView(BaseViewSet):
             },
             message="Wallet created successfully.",
             status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=['GET'])
+    @extend_schema(
+        summary="List of wallet logs",
+        description="This endpoint generate list of logs.",
+        responses=WalletLogOutputSerializer,
+    )
+    def logs(self, request, *args, **kwargs):
+        wallet_hash = kwargs.get('hash')
+        wallet = WalletService.get_wallet_from_hash(wallet_hash)
+
+        logs, meta = WalletLogService.get_by_pagination(
+            queryset=WalletLogService.get_list(queryset=WalletLog.objects.filter(wallet=wallet)),
+            page=self.request.query_params.get("page", 1),
+            size=self.request.query_params.get("size", 10),
+        )
+        return Response(
+            data={
+                "logs": WalletLogOutputSerializer(logs, many=True).data
+            }, message="List of logs.", meta=meta
         )
 
 
@@ -136,34 +154,4 @@ class TransferView(BaseViewSet):
             },
             message="Transfer created successfully.",
             status=status.HTTP_201_CREATED
-        )
-
-
-class WalletLogView(BaseViewSet):
-    _service = WalletLogService
-    serializer_class = WalletLogOutputSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({"request": self.request})
-        return context
-
-    @extend_schema(
-        request=WalletLogInputSerializer,
-        summary="List of wallet logs",
-        description="This endpoint generate list of logs.",
-        responses=WalletLogOutputSerializer,
-    )
-    def list(self, request, wallet_hash, *args, **kwargs):
-        wallet = WalletService.get_wallet_from_hash(wallet_hash)
-
-        logs, meta = self._service.get_by_pagination(
-            queryset=self._service.get_list(queryset=WalletLog.objects.filter(wallet=wallet)),
-            page=self.request.query_params.get("page", 1),
-            size=self.request.query_params.get("size", 10),
-        )
-        return Response(
-            data={
-                "logs": self.get_serializer(logs, many=True).data
-            }, message="List of logs.", meta=meta
         )

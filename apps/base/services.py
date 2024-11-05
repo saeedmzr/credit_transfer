@@ -71,5 +71,5 @@ class BaseService(ABC):
 
     @classmethod
     def get_by_pagination(cls, queryset: QuerySet = None, page=1, size=10):
-        result = cls._repository.get_by_pagination(queryset, page, size)
+        result = cls._repository.get_by_pagination(queryset, int(page), int(size))
         return result

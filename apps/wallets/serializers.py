@@ -85,10 +85,10 @@ class DepositSerializer(serializers.Serializer):
     amount = serializers.FloatField()
     wallet = serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
 
-    def validate_wallet(self, value):
+    def validate_wallet_id(self, value):
         user = self.context['request'].user
         wallet = Wallet.objects.owner(user=user).filter(pk=value)
-        if wallet is None:
+        if wallet.user is not user:
             raise NotFoundError()
         return value
 
