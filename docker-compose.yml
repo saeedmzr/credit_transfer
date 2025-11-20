@@ -1,0 +1,123 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    container_name: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - web_credit_transfer
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - '5050:80'
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - web_credit_transfer
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: app
+    command: >
+      sh -c 'python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py collectstatic --no-input &&
+             python manage.py runserver 0.0.0.0:8000'
+    restart: always
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    networks:
+      - web_credit_transfer
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: celery -A credit_transfer worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - app
+    networks:
+      - web_credit_transfer
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: celery -A credit_transfer beat --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - app
+    networks:
+      - web_credit_transfer
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: flower
+    command: celery -A credit_transfer flower --loglevel=info --port=5555
+    env_file:
+      - .env
+    depends_on:
+      - celery-worker
+    ports:
+      - '5555:5555'
+    networks:
+      - web_credit_transfer
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - '8070:80'
+      - '443:443'
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/certs:/etc/nginx/certs
+    depends_on:
+      - app
+    networks:
+      - web_credit_transfer
+
+  redis:
+    image: redis:latest
+    networks:
+      - web_credit_transfer
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:
+
+networks:
+  web_credit_transfer:
