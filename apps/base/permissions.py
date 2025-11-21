@@ -21,4 +21,8 @@ class IsAdminOrOwner(BasePermission):
 
         if hasattr(obj, "user"):
             return obj.user == request.user
+        if hasattr(obj, "owner"):
+            return obj.owner == request.user
+        if hasattr(obj, "wallet"):
+            return obj.wallet.owner == request.user
         return False

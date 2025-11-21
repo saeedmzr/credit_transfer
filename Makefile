@@ -34,3 +34,5 @@ venv:
 	python3.12 -m venv venv
 install:
 	. venv/bin/activate && pip install -r requirements/local.txt
+createsuperuser:
+	@docker compose --env-file .env -f $(COMPOSE_FILE) exec app sh -c "python manage.py createsuperuser"

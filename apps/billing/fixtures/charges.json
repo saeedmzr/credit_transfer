@@ -1,0 +1,38 @@
+[
+  {
+    "model": "billing.charge",
+    "pk": 1,
+    "fields": {
+      "wallet": 1,
+      "amount": 100000,
+      "status": "Confirmed",
+      "wallet_transaction": 1,
+      "created_at": "2025-01-02T00:00:00Z",
+      "processed_at": "2025-01-02T00:00:10Z"
+    }
+  },
+  {
+    "model": "billing.charge",
+    "pk": 2,
+    "fields": {
+      "wallet": 2,
+      "amount": 20000,
+      "status": "Pending",
+      "wallet_transaction": 3,
+      "created_at": "2025-01-03T00:00:00Z",
+      "processed_at": null
+    }
+  },
+    {
+    "model": "billing.charge",
+    "pk": 3,
+    "fields": {
+      "wallet": 1,
+      "amount": 20000,
+      "status": "Pending",
+      "wallet_transaction": 4,
+      "created_at": "2025-01-03T00:00:00Z",
+      "processed_at": null
+    }
+  }
+]
