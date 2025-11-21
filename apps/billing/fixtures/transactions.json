@@ -1,0 +1,54 @@
+[
+  {
+    "model": "billing.wallettransaction",
+    "pk": 1,
+    "fields": {
+      "wallet": 2,
+      "type": "Charge",
+      "status": "Confirmed",
+      "amount": 100000,
+      "balance_after": 100000,
+      "meta": {"note": "initial charge"},
+      "created_at": "2025-01-02T00:00:00Z"
+    }
+  },
+  {
+    "model": "billing.wallettransaction",
+    "pk": 2,
+    "fields": {
+      "wallet": 3,
+      "type": "Charge",
+      "status": "Confirmed",
+      "amount": 50000,
+      "balance_after": 50000,
+      "meta": {"note": "initial charge"},
+      "created_at": "2025-01-02T00:05:00Z"
+    }
+  },
+  {
+    "model": "billing.wallettransaction",
+    "pk": 3,
+    "fields": {
+      "wallet": 2,
+      "type": "Charge",
+      "status": "Pending",
+      "amount": 20000,
+      "balance_after": null,
+      "meta": {"note": "pending charge"},
+      "created_at": "2025-01-03T00:00:00Z"
+    }
+  },
+    {
+    "model": "billing.wallettransaction",
+    "pk": 4,
+    "fields": {
+      "wallet": 2,
+      "type": "Charge",
+      "status": "Pending",
+      "amount": 20000,
+      "balance_after": null,
+      "meta": {"note": "pending charge"},
+      "created_at": "2025-01-03T00:00:00Z"
+    }
+  }
+]
