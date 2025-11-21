@@ -12,8 +12,12 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('POSTGRES_NAME', default='postgres'),
+        'HOST': env('POSTGRES_DB_HOST', default='localhost'),
+        'PORT': env('POSTGRES_DB_PORT', default=5432),
+        'USER': env('POSTGRES_USER', default='postgres'),
+        'PASSWORD': env('POSTGRES_PASSWORD', default='postgres'),
     }
 }
 

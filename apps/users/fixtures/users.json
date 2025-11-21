@@ -25,12 +25,25 @@
       "updated_at": "2025-01-01T00:00:00Z"
     }
   },
-    {
+  {
     "model": "users.user",
     "pk": 103,
     "fields": {
       "username": "normaluser2",
       "email": "normal2@example.com",
+      "role": "user",
+      "is_active": true,
+      "password": "bcrypt_sha256$$2b$12$TuxhBW3UoYk4JOcGzO4LQepAiRMefKn.4Kcu4d2qw7UPzWRM2JwQi",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 104,
+    "fields": {
+      "username": "normaluser3",
+      "email": "normal3@example.com",
       "role": "user",
       "is_active": true,
       "password": "bcrypt_sha256$$2b$12$TuxhBW3UoYk4JOcGzO4LQepAiRMefKn.4Kcu4d2qw7UPzWRM2JwQi",

@@ -50,6 +50,7 @@ services:
       - web_credit_transfer
 
   celery-worker:
+    container_name: celery
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -62,6 +63,7 @@ services:
       - web_credit_transfer
 
   celery-beat:
+    container_name: celery-beat
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -104,6 +106,7 @@ services:
 
   redis:
     image: redis:latest
+    container_name: redis
     networks:
       - web_credit_transfer
     ports:
